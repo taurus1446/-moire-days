@@ -1,0 +1,6 @@
+{
+  "appId": "app.moire.anniversary",
+  "appName": "모아르 MOIRE",
+  "webDir": "www",
+  "server": { "androidScheme": "https" }
+}
