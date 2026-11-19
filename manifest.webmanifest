@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "모아르 MOIRE",
+  "short_name": "모아르",
+  "description": "소중한 날짜와 추억을 기록하는 기념일 앱 MOIRE",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f5f0",
+  "theme_color": "#f8f5f0",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
