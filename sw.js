@@ -1,4 +1,4 @@
-const CACHE = 'moire-v2-1-static-v1';
+const CACHE = 'moire-v2-2-static-v1';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
