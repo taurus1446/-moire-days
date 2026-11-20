@@ -1,0 +1,57 @@
+
+name: Import MOIRE v2.3
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract MOIRE v2.3
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, zipfile
+
+          path = "MOIRE-v2.3-source.zip"
+          if not os.path.isfile(path):
+              raise SystemExit("MOIRE v2.3 ZIP not found")
+
+          with zipfile.ZipFile(path) as z:
+              members = [m for m in z.infolist() if not m.is_dir()]
+              for m in members:
+                  p = m.filename.replace("\\", "/")
+                  parts = p.split("/")
+                  if ".." in parts or p.startswith("/"):
+                      raise SystemExit("Unsafe ZIP path")
+              for m in members:
+                  p = m.filename.replace("\\", "/")
+                  parts = p.split("/")
+                  if len(parts) > 1 and parts[0].lower().startswith("moire"):
+                      p = "/".join(parts[1:])
+                  if not p or p.startswith(".github/"):
+                      continue
+                  if p == "MOIRE-v2.3-source.zip":
+                      continue
+                  os.makedirs(os.path.dirname(p) or ".", exist_ok=True)
+                  with z.open(m) as src, open(p, "wb") as dst:
+                      import shutil
+                      shutil.copyfileobj(src, dst)
+          PY
+
+      - name: Commit updated source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Import MOIRE v2.3 source"
+            git push
+          fi
