@@ -31,6 +31,8 @@ jobs:
         run: npx cap add android
       - name: Sync app
         run: npx cap sync android
+      - name: Install MOIRE native features
+        run: bash native/install-native.sh
       - name: Apply official MOIRE launcher icon
         run: |
           for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
@@ -44,6 +46,6 @@ jobs:
         run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: MOIRE-v2.2-APK
+          name: MOIRE-v2.3-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
