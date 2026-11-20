@@ -9,12 +9,12 @@ cp native/moire_widget_info.xml "$SRC/res/xml/"
 python3 - <<'PYXML'
 from pathlib import Path
 p=Path('android/app/src/main/AndroidManifest.xml');s=p.read_text();s=s.replace('<application', '<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/><uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/><application',1)
-receiver="
+receiver="""
         <receiver android:name=".MoireWidget" android:exported="true" android:label="MOIRE">
           <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.DATE_CHANGED"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/></intent-filter>
           <meta-data android:name="android.appwidget.provider" android:resource="@xml/moire_widget_info"/>
         </receiver>
-"
+"""
 s=s.replace('</application>',receiver+'</application>');p.write_text(s)
 PYXML
 python3 - <<'PYNAME'
