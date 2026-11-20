@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "모아르 MOIRE",
-  "short_name": "모아르",
-  "description": "모아르 - 심플한 기념일, 음력, 디데이 관리 앱",
+  "name": "MOIRE",
+  "short_name": "MOIRE",
+  "description": "MOIRE anniversary and D-day manager",
   "lang": "ko",
   "start_url": "./",
   "scope": "./",
