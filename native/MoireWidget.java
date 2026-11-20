@@ -13,5 +13,5 @@ public class MoireWidget extends AppWidgetProvider {
 for (int id : ids) {
     array.put(id);
 }
-return array.toString();;}}
+return array.toString();}}
 }
