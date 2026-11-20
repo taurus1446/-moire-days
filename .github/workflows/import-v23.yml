@@ -1,8 +1,13 @@
 
 name: Import MOIRE v2.3
 
+
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - '.github/workflows/import-v23.yml'
+
 
 permissions:
   contents: write
