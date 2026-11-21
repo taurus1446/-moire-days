@@ -31,7 +31,7 @@ jobs:
         run: npx cap add android
       - name: Sync app
         run: npx cap sync android
-      - name: Install MOIRE native features
+      - name: Install native widgets and notification
         run: bash native/install-native.sh
       - name: Apply official MOIRE launcher icon
         run: |
@@ -41,11 +41,26 @@ jobs:
             cp android-icons/mipmap-$density/ic_launcher_round.png android/app/src/main/res/mipmap-$density/ic_launcher_round.png
           done
           rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
-      - name: Build debug APK
+      - name: Configure signed release
+        env:
+          KEYSTORE_B64: ${{ secrets.MOIRE_KEYSTORE_BASE64 }}
+          STORE_PASS: ${{ secrets.MOIRE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.MOIRE_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.MOIRE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$KEYSTORE_B64" && test -n "$STORE_PASS" && test -n "$KEY_ALIAS" && test -n "$KEY_PASS"
+          printf '%s' "$KEYSTORE_B64" | base64 -d > android/app/moire-release.jks
+          python3 native/configure-signing.py
+      - name: Build signed release APK
         working-directory: android
-        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+        env:
+          STORE_PASS: ${{ secrets.MOIRE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.MOIRE_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.MOIRE_KEY_PASSWORD }}
+        run: chmod +x gradlew && ./gradlew assembleRelease --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: MOIRE-v2.3-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: MOIRE-signed-release-APK
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
