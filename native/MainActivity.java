@@ -55,8 +55,14 @@ public class MainActivity extends BridgeActivity {
       if(!a.canScheduleExactAlarms())try{startActivity(new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:"+getPackageName())));}catch(Exception ignored){}
     }
   }
+  private static String jsonArg(Object value){
+    if(value==null)return "null";
+    if(value instanceof String)return JSONObject.quote((String)value);
+    if(value instanceof Boolean || value instanceof Number)return value.toString();
+    return JSONObject.quote(value.toString());
+  }
   private void sendJs(String callback,Object first,Object second){
-    String script="window."+callback+"&&window."+callback+"("+JSONObject.valueToString(first)+","+JSONObject.valueToString(second)+")";
+    String script="window."+callback+"&&window."+callback+"("+jsonArg(first)+","+jsonArg(second)+")";
     runOnUiThread(()->{if(getBridge()!=null&&getBridge().getWebView()!=null)getBridge().getWebView().evaluateJavascript(script,null);});
   }
   public class FileBridge {
