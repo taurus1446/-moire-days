@@ -2,7 +2,7 @@ name: Build MOIRE Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, moire-v2.4]
     paths-ignore: ['**/*.md', '**/*.txt']
 permissions:
   contents: read
