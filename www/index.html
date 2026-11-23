@@ -18,7 +18,7 @@ dialog{background:#fff}dialog h2{letter-spacing:-.5px}
 </style></head><body><main class="app">
 <header><div><div class="brand">MOIRE · v2.4</div><h1>모아르</h1></div><button aria-label="설정 열기" class="header-menu" onclick="$('settingsPanel').open=!$('settingsPanel').open">⚙</button></header>
 <div class="between topbar"><span>디데이 관리</span><select aria-label="정렬" id="sort"><option value="upcoming">다가오는 순</option><option value="name">이름 순</option><option value="created">등록 순</option></select></div>
-<div class="category-filter"><label for="categoryFilter">분류별 보기</label><select id="categoryFilter" aria-label="기념일 분류 필터"><option value="all">전체</option></select><label class="checkrow"><input type="checkbox" id="showAutoDays" checked> 공휴일·주요 기념일 자동 표시</label><p class="hint">자동 기념일은 내 기록에 저장되지 않으며 알람도 자동 설정되지 않습니다. 임시공휴일·선거일 등은 별도 확인이 필요합니다.</p></div><section class="emptycard" hidden="" id="emptyCard"><strong>기념일을 등록해보세요 🎉</strong><span>생일, 결혼기념일, 처음 만난 날 등<br/>소중한 날을 기록하세요.</span></section>
+<div class="category-filter"><label for="categoryFilter">분류별 보기</label><select id="categoryFilter" aria-label="기념일 분류 필터"><option value="all">전체</option></select></div><section class="emptycard" hidden="" id="emptyCard"><strong>기념일을 등록해보세요 🎉</strong><span>생일, 결혼기념일, 처음 만난 날 등<br/>소중한 날을 기록하세요.</span></section>
 <section id="listSection"><div id="list"></div></section>
 <details class="settings-panel" id="settingsPanel"><summary>설정 · 검색 · 백업</summary>
 <label for="search">기념일 검색</label><input aria-label="기념일 검색" id="search" placeholder="이름으로 검색"/>
@@ -46,46 +46,10 @@ function updateLunarPreview(){if($('calendarType').value!=='lunar')return;let y=
 for(let m=1;m<=12;m++)$('lunarMonth').add(new Option(m+'월',m));for(let d=1;d<=30;d++)$('lunarDay').add(new Option(d+'일',d));['lunarYear','lunarMonth','lunarDay','lunarLeap'].forEach(id=>$(id).addEventListener('change',updateLunarPreview));
 function today(){let d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}function parseDate(s){let [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}function pad(n){return String(n).padStart(2,'0')}function formatDate(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}function occurrence(y,m,day){let d=new Date(y,m,day);return d.getMonth()===m?d:new Date(y,2,1)}function nextDate(e){let d=parseDate(e.date),t=today();if(!e.repeat)return d;if(e.calendarType==='lunar'){let ly=lunarParts(t).year;for(let y=Math.max(ly,Number(e.lunarYear)||ly);y<=Math.min(2099,ly+20);y++){let x=solarForLunar(y,Number(e.lunarMonth),Number(e.lunarDay),!!e.lunarLeap);if(x&&x>=t)return x}return d}let x=occurrence(t.getFullYear(),d.getMonth(),d.getDate());if(x<t)x=occurrence(t.getFullYear()+1,d.getMonth(),d.getDate());return x}function previousDate(e){let t=today(),base=parseDate(e.date);if(!e.repeat)return base<t?base:null;if(e.calendarType==='lunar'){let ly=lunarParts(t).year;for(let y=Math.min(2099,ly);y>=Math.max(1900,Number(e.lunarYear)||1900);y--){let x=solarForLunar(y,Number(e.lunarMonth),Number(e.lunarDay),!!e.lunarLeap);if(x&&x<t&&x>=base)return x}return null}for(let y=t.getFullYear();y>=base.getFullYear();y--){let x=occurrence(y,base.getMonth(),base.getDate());if(x<t&&x>=base)return x}return null}function diff(d){let a=Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()),b=Date.UTC(today().getFullYear(),today().getMonth(),today().getDate());return Math.round((a-b)/86400000)}function displayDays(n){return n===0?'D-DAY':n>0?'D-'+n:'D+'+Math.abs(n)}function anniversaryLabel(e){if(!e.repeat)return '';let orig=parseDate(e.date),next=nextDate(e),years=e.calendarType==='lunar'?lunarParts(next).year-Number(e.lunarYear):next.getFullYear()-orig.getFullYear();if(years<0)return '';return e.category==='🎂'?(years===0?'태어난 날':years+'번째 생일'):(years===0?'첫 기념일':years+'주년')}function avatar(e,cls='avatar'){if(e.photo){let im=document.createElement('img');im.className=cls;im.src=e.photo;im.alt=e.name+' 사진';return im}let div=document.createElement('div');div.className=cls;div.textContent=e.category||'🎉';return div}function elapsed(d){let t=today();if(d>t)return null;let y=t.getFullYear()-d.getFullYear(),m=t.getMonth()-d.getMonth(),days=t.getDate()-d.getDate();if(days<0){m--;days+=new Date(t.getFullYear(),t.getMonth(),0).getDate()}if(m<0){y--;m+=12}if(days<0){days=0}return {y,m,days,total:diff(t)-diff(d)}}function remindLabel(n){if(n%10080===0)return n/10080+'주 전';if(n%1440===0)return n/1440+'일 전';if(n%60===0)return n/60+'시간 전';return n+'분 전'}
 
-// MOIRE automatic days: virtual records only; never added to precious-days-v1.
 const CATEGORY_LABELS={'🎂':'생일','❤️':'연애·결혼','👨‍👩‍👧':'가족','🎓':'학교·교육','💼':'직장·사업','🌿':'생활·개인','🐾':'반려동물','📅':'명절·공휴일','🎉':'특별한 날','🕯️':'추모·기일'};
-const AUTO_PREF='moire-auto-days-v24';
 let categoryFilter='all';
-function autoDaysEnabled(){return $('showAutoDays').checked}
-try{$('showAutoDays').checked=localStorage.getItem(AUTO_PREF)!=='false'}catch{}
 for(const [emoji,name] of Object.entries(CATEGORY_LABELS))$('categoryFilter').add(new Option(emoji+' '+name,emoji));
 $('categoryFilter').addEventListener('change',e=>{categoryFilter=e.target.value;render()});
-$('showAutoDays').addEventListener('change',e=>{try{localStorage.setItem(AUTO_PREF,String(e.target.checked))}catch{}render()});
-const FIXED_HOLIDAYS=[['신정',1,1],['삼일절',3,1],['어린이날',5,5],['현충일',6,6],['광복절',8,15],['개천절',10,3],['한글날',10,9],['성탄절',12,25]];
-const FIXED_SPECIAL=[['밸런타인데이',2,14],['화이트데이',3,14],['어버이날',5,8],['스승의 날',5,15],['부부의 날',5,21],['빼빼로데이',11,11],['핼러윈',10,31]];
-function automaticDays(){
- const yr=today().getFullYear(),out=[];
- function add(name,date,category){if(date&&date>=today())out.push({name,date,category})}
- for(const y of [yr,yr+1]){
-  for(const [name,m,d] of FIXED_HOLIDAYS)add(name,new Date(y,m-1,d),'📅');
-  for(const [name,m,d] of FIXED_SPECIAL)add(name,new Date(y,m-1,d),'🎉');
-  for(const [name,m,d] of [['설날',1,1],['부처님오신날',4,8],['추석',8,15]]){
-   const base=solarForLunar(y,m,d,false);if(!base)continue;
-   add(name,base,'📅');
-   if(name!=='부처님오신날')for(const [offset,label] of [[-1,'연휴 전날'],[1,'연휴 다음날']])add(name+' '+label,new Date(base.getFullYear(),base.getMonth(),base.getDate()+offset),'📅');
-  }
- }
- return out.sort((a,b)=>a.date-b.date);
-}
-function renderAutomaticDays(list){
- if(!autoDaysEnabled())return;
- const rows=automaticDays().filter(e=>(categoryFilter==='all'||e.category===categoryFilter)&&e.name.toLocaleLowerCase().includes(searchText));
- if(!rows.length)return;
- const heading=document.createElement('h2');heading.textContent='자동 기념일';list.append(heading);
- for(const e of rows){
-  const item=document.createElement('div');item.className='item';
-  const pic=document.createElement('div');pic.className='avatar';pic.textContent=e.category;
-  const grow=document.createElement('div');grow.className='grow';
-  const name=document.createElement('div');name.className='name-text';name.textContent=e.name;
-  const sub=document.createElement('div');sub.className='sub';sub.textContent=formatDate(e.date)+' · 자동 표시 · 알람 없음';grow.append(name,sub);
-  const days=document.createElement('div');days.className='days';days.textContent=displayDays(diff(e.date));
-  item.append(pic,grow,days);list.append(item);
- }
-}
 
 function render(){
  let sorted=entries.map(e=>({...e,next:nextDate(e)})).sort((a,b)=>sortMode==='name'?a.name.localeCompare(b.name,'ko'):sortMode==='created'?String(b.id).localeCompare(String(a.id)):a.next-b.next);
@@ -94,9 +58,9 @@ function render(){
  if(!pinned.length){let x=document.createElement('div');x.className='muted';x.style.gridColumn='1/-1';x.style.padding='12px 0';x.textContent='위젯 카드에 표시할 기념일이 없습니다.';widgets.append(x)}
  pinned.forEach(e=>{let card=document.createElement('button');card.className='widget';card.style.textAlign='left';card.style.cursor='pointer';card.style.color='inherit';card.onclick=()=>showDetail(e.id);card.append(avatar(e));let label=document.createElement('div');label.className='label';label.textContent=e.name;let day=document.createElement('div');day.className='big';day.textContent=displayDays(diff(e.next));card.append(label,day);widgets.append(card)});
  let list=$('list');list.replaceChildren();let visible=sorted.filter(e=>e.name.toLocaleLowerCase().includes(searchText) && (categoryFilter==='all'||e.category===categoryFilter));
- $('emptyCard').hidden=entries.length!==0 || (autoDaysEnabled() && automaticDays().length>0);
- if(entries.length===0 && !autoDaysEnabled()){return}
- if(!visible.length && (!autoDaysEnabled()||!automaticDays().some(e=>(categoryFilter==='all'||e.category===categoryFilter)&&e.name.toLocaleLowerCase().includes(searchText)))){let p=document.createElement('div');p.className='empty';p.textContent='표시할 기념일이 없습니다.';list.append(p)}
+ $('emptyCard').hidden=entries.length!==0;
+ if(entries.length===0){return}
+ if(!visible.length){let p=document.createElement('div');p.className='empty';p.textContent='표시할 기념일이 없습니다.';list.append(p)}
  visible.forEach(e=>{
   let item=document.createElement('div');item.className='item';
   let pic=avatar(e);pic.style.cursor='pointer';pic.onclick=()=>showDetail(e.id);
@@ -111,7 +75,7 @@ function render(){
   let del=document.createElement('button');del.className='delete';del.textContent='×';del.setAttribute('aria-label',e.name+' 삭제');del.onclick=()=>{if(confirm('이 기념일을 삭제할까요?')){let before=entries.slice();entries=entries.filter(x=>x.id!==e.id);if(save())showUndo();else entries=before}};
   controls.append(days,edit,del);item.append(pic,grow,controls);list.append(item);
  });
- renderAutomaticDays(list);
+
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(entries))}catch{alert('저장에 실패했습니다. 기존 데이터는 유지됩니다. 사진 크기를 줄이거나 백업 후 저장 공간을 확인해 주세요.');return false}render();syncNative();return true}function photoPreview(){let p=$('photoPreview');p.replaceChildren();if(photoData){let im=document.createElement('img');im.src=photoData;im.className='avatar';p.append(im);let t=document.createElement('span');t.className='muted';t.textContent='선택한 사진';p.append(t)}else p.textContent='등록된 사진 없음'}function clearPhoto(){photoData='';$('photo').value='';photoPreview()}
 $('photo').addEventListener('change',async e=>{let file=e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){alert('이미지 파일을 선택해 주세요.');return}try{let img=new Image(),url=URL.createObjectURL(file);await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});let size=320,canvas=document.createElement('canvas');canvas.width=canvas.height=size;let ctx=canvas.getContext('2d'),scale=Math.max(size/img.width,size/img.height);ctx.drawImage(img,(size-img.width*scale)/2,(size-img.height*scale)/2,img.width*scale,img.height*scale);photoData=canvas.toDataURL('image/jpeg',.72);URL.revokeObjectURL(url);photoPreview()}catch{alert('사진을 불러오지 못했습니다. 다른 사진을 선택해 주세요.')}});
