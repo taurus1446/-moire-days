@@ -1,7 +1,7 @@
 package app.moire.anniversary;
 import android.app.*;import android.appwidget.*;import android.content.*;import android.graphics.Color;import android.os.*;import android.text.*;import android.text.style.ForegroundColorSpan;import android.webkit.JavascriptInterface;import android.widget.RemoteViews;import org.json.*;import java.util.*;import java.text.SimpleDateFormat;
 public class MoireWidget extends AppWidgetProvider {
- static final String PREF="moire_v23",CHANNEL="moire_upcoming_v24",ACTION_MIDNIGHT="app.moire.anniversary.MIDNIGHT";
+ static final String PREF="moire_v23",CHANNEL="moire_upcoming_v24",ACTION_MIDNIGHT="app.moire.anniversary.MIDNIGHT",GROUP="app.moire.anniversary.UPCOMING_GROUP",NOTIF_PREF="moire_v24_notification_ids";
  @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){refresh(c);}
  @Override public void onDeleted(Context c,int[] ids){refresh(c);}
  @Override public void onReceive(Context c,Intent i){super.onReceive(c,i);if(ACTION_MIDNIGHT.equals(i.getAction())||Intent.ACTION_BOOT_COMPLETED.equals(i.getAction())||Intent.ACTION_DATE_CHANGED.equals(i.getAction())||Intent.ACTION_TIMEZONE_CHANGED.equals(i.getAction())||Intent.ACTION_TIME_CHANGED.equals(i.getAction())){refresh(c);MoireAlarm.scheduleAll(c);}}
@@ -24,6 +24,38 @@ public class MoireWidget extends AppWidgetProvider {
  }catch(Exception e){android.util.Log.e("MOIRE","midnight schedule",e);}}
  static String lines(JSONArray a,int max){StringBuilder b=new StringBuilder();for(int i=0;i<Math.min(max,a.length());i++){JSONObject x=a.optJSONObject(i);if(x==null)continue;if(b.length()>0)b.append("\n");b.append(x.optString("category","🎉")).append(" ").append(x.optString("name")).append("  ").append(dday(remaining(x)));}return b.length()==0?"MOIRE에서 기념일을 선택하세요":b.toString();}
  static CharSequence styled(JSONArray a,int max){SpannableStringBuilder b=new SpannableStringBuilder();for(int i=0;i<Math.min(max,a.length());i++){JSONObject x=a.optJSONObject(i);if(x==null)continue;if(b.length()>0)b.append("\n");int start=b.length();b.append(x.optString("category","🎉")).append(" ").append(x.optString("name"));b.setSpan(new ForegroundColorSpan(Color.BLACK),start,b.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);b.append("  ");start=b.length();b.append(dday(remaining(x)));b.setSpan(new ForegroundColorSpan(Color.RED),start,b.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);}return b;}
- static void refresh(Context c){scheduleMidnight(c);try{JSONObject data=new JSONObject(c.getSharedPreferences(PREF,0).getString("data","{}"));AppWidgetManager manager=AppWidgetManager.getInstance(c);int[] ids=manager.getAppWidgetIds(new ComponentName(c,MoireWidget.class));JSONObject widgets=data.optJSONObject("widgets");for(int id:ids){JSONArray list=rows(widgets,String.valueOf(id));RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.moire_widget);v.setTextViewText(R.id.widget_text,lines(list,5));Intent intent=new Intent(c,MainActivity.class).putExtra("moire_widget_id",id).setData(android.net.Uri.parse("moire://widget/"+id));PendingIntent pi=PendingIntent.getActivity(c,id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);v.setOnClickPendingIntent(R.id.widget_root,pi);manager.updateAppWidget(id,v);}NotificationManager nm=(NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);nm.createNotificationChannel(new NotificationChannel(CHANNEL,"MOIRE 기념일 목록",NotificationManager.IMPORTANCE_LOW));JSONArray list=rows(data,"notifications");nm.cancel(2301);if(list.length()==0)return;Intent launch=new Intent(c,MainActivity.class);PendingIntent pi=PendingIntent.getActivity(c,2301,launch,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);Notification n=new Notification.Builder(c,CHANNEL).setSmallIcon(R.mipmap.ic_launcher).setContentTitle("MOIRE").setContentText(styled(list,1)).setStyle(new Notification.BigTextStyle().bigText(styled(list,3))).setContentIntent(pi).setOngoing(true).setShowWhen(false).build();nm.notify(2301,n);}catch(Exception e){android.util.Log.e("MOIRE","refresh",e);}}
+ static void refresh(Context c){scheduleMidnight(c);try{JSONObject data=new JSONObject(c.getSharedPreferences(PREF,0).getString("data","{}"));AppWidgetManager manager=AppWidgetManager.getInstance(c);int[] ids=manager.getAppWidgetIds(new ComponentName(c,MoireWidget.class));JSONObject widgets=data.optJSONObject("widgets");for(int id:ids){JSONArray list=rows(widgets,String.valueOf(id));RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.moire_widget);v.setTextViewText(R.id.widget_text,lines(list,5));Intent intent=new Intent(c,MainActivity.class).putExtra("moire_widget_id",id).setData(android.net.Uri.parse("moire://widget/"+id));PendingIntent pi=PendingIntent.getActivity(c,id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);v.setOnClickPendingIntent(R.id.widget_root,pi);manager.updateAppWidget(id,v);}NotificationManager nm=(NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
+ nm.createNotificationChannel(new NotificationChannel(CHANNEL,"MOIRE 기념일 목록",NotificationManager.IMPORTANCE_LOW));
+ JSONArray list=rows(data,"notifications");
+ // Remove the old combined notification and stale child notifications without touching alarm notifications.
+ nm.cancel(2301);
+ android.content.SharedPreferences np=c.getSharedPreferences(NOTIF_PREF,0);
+ Set<String> previous=np.getStringSet("ids",Collections.emptySet());
+ Set<String> current=new HashSet<>();
+ for(int k=0;k<list.length();k++){JSONObject x=list.optJSONObject(k);if(x==null)continue;
+   String key=x.optString("id",String.valueOf(k));current.add(key);
+   Intent launch=new Intent(c,MainActivity.class).setAction("app.moire.anniversary.OPEN_NOTIFICATION").setData(android.net.Uri.parse("moire://notification/"+android.net.Uri.encode(key)));
+   PendingIntent pi=PendingIntent.getActivity(c,key.hashCode(),launch,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+   String name=x.optString("name","기념일"),emoji=x.optString("category","🎉"),day=dday(remaining(x));
+   String date=x.optString("date","");
+   String detail=emoji+"  "+day+(date.isEmpty()?"":"  ·  "+date);
+   Notification child=new Notification.Builder(c,CHANNEL).setSmallIcon(R.mipmap.ic_launcher)
+    .setContentTitle(name).setContentText(detail)
+    .setStyle(new Notification.BigTextStyle().bigText(detail))
+    .setGroup(GROUP).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
+    .setContentIntent(pi).setOngoing(true).setShowWhen(false).setOnlyAlertOnce(true).build();
+   nm.notify("moire-day-"+key,2302,child);
+ }
+ for(String old:previous)if(!current.contains(old))nm.cancel("moire-day-"+old,2302);
+ np.edit().putStringSet("ids",new HashSet<>(current)).apply();
+ if(current.isEmpty()){nm.cancel("moire-day-summary",2303);return;}
+ Intent open=new Intent(c,MainActivity.class);
+ PendingIntent summaryPi=PendingIntent.getActivity(c,2303,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+ Notification summary=new Notification.Builder(c,CHANNEL).setSmallIcon(R.mipmap.ic_launcher)
+   .setContentTitle("MOIRE · 기념일").setContentText("선택한 기념일 "+current.size()+"개")
+   .setStyle(new Notification.InboxStyle().setBigContentTitle("MOIRE · 기념일").setSummaryText("선택한 기념일 "+current.size()+"개"))
+   .setGroup(GROUP).setGroupSummary(true).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
+   .setContentIntent(summaryPi).setOngoing(true).setShowWhen(false).setOnlyAlertOnce(true).build();
+ nm.notify("moire-day-summary",2303,summary);}catch(Exception e){android.util.Log.e("MOIRE","refresh",e);}}
  public static class Bridge {Context c;Bridge(Context c){this.c=c;}@JavascriptInterface public void update(String json){try{JSONObject o=new JSONObject(json);c.getSharedPreferences(PREF,0).edit().putString("data",json).apply();JSONArray alarms=rows(o,"alarms");new Handler(Looper.getMainLooper()).post(()->{refresh(c);MoireAlarm.sync(c,alarms);});}catch(Exception e){android.util.Log.e("MOIRE","update",e);}}@JavascriptInterface public int getLaunchWidgetId(){return c instanceof MainActivity?((MainActivity)c).getLaunchWidgetId():-1;}@JavascriptInterface public String getWidgetIds(){try{return new JSONArray(AppWidgetManager.getInstance(c).getAppWidgetIds(new ComponentName(c,MoireWidget.class))).toString();}catch(org.json.JSONException e){return "[]";}}@JavascriptInterface public void testAlarm(){new Handler(Looper.getMainLooper()).post(()->MoireAlarm.test(c));}@JavascriptInterface public void chooseSound(){if(c instanceof MainActivity)new Handler(Looper.getMainLooper()).post(()->((MainActivity)c).chooseSound());}}
 }
