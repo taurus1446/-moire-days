@@ -24,7 +24,31 @@ public class MoireWidget extends AppWidgetProvider {
  }catch(Exception e){android.util.Log.e("MOIRE","midnight schedule",e);}}
  static String lines(JSONArray a,int max){StringBuilder b=new StringBuilder();for(int i=0;i<Math.min(max,a.length());i++){JSONObject x=a.optJSONObject(i);if(x==null)continue;if(b.length()>0)b.append("\n");b.append(x.optString("category","🎉")).append(" ").append(x.optString("name")).append("  ").append(dday(remaining(x)));}return b.length()==0?"MOIRE에서 기념일을 선택하세요":b.toString();}
  static CharSequence styled(JSONArray a,int max){SpannableStringBuilder b=new SpannableStringBuilder();for(int i=0;i<Math.min(max,a.length());i++){JSONObject x=a.optJSONObject(i);if(x==null)continue;if(b.length()>0)b.append("\n");int start=b.length();b.append(x.optString("category","🎉")).append(" ").append(x.optString("name"));b.setSpan(new ForegroundColorSpan(Color.BLACK),start,b.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);b.append("  ");start=b.length();b.append(dday(remaining(x)));b.setSpan(new ForegroundColorSpan(Color.RED),start,b.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);}return b;}
- static void refresh(Context c){scheduleMidnight(c);try{JSONObject data=new JSONObject(c.getSharedPreferences(PREF,0).getString("data","{}"));AppWidgetManager manager=AppWidgetManager.getInstance(c);int[] ids=manager.getAppWidgetIds(new ComponentName(c,MoireWidget.class));JSONObject widgets=data.optJSONObject("widgets");for(int id:ids){JSONArray list=rows(widgets,String.valueOf(id));RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.moire_widget);v.setTextViewText(R.id.widget_text,lines(list,5));Intent intent=new Intent(c,MainActivity.class).putExtra("moire_widget_id",id).setData(android.net.Uri.parse("moire://widget/"+id));PendingIntent pi=PendingIntent.getActivity(c,id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);v.setOnClickPendingIntent(R.id.widget_root,pi);manager.updateAppWidget(id,v);}NotificationManager nm=(NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
+
+ static void renderWidget(RemoteViews v,JSONArray list){
+  int count=0;
+  int[] row={R.id.widget_row_1,R.id.widget_row_2,R.id.widget_row_3,R.id.widget_row_4,R.id.widget_row_5};
+  int[] icon={R.id.widget_icon_1,R.id.widget_icon_2,R.id.widget_icon_3,R.id.widget_icon_4,R.id.widget_icon_5};
+  int[] name={R.id.widget_name_1,R.id.widget_name_2,R.id.widget_name_3,R.id.widget_name_4,R.id.widget_name_5};
+  int[] date={R.id.widget_date_1,R.id.widget_date_2,R.id.widget_date_3,R.id.widget_date_4,R.id.widget_date_5};
+  int[] days={R.id.widget_dday_1,R.id.widget_dday_2,R.id.widget_dday_3,R.id.widget_dday_4,R.id.widget_dday_5};
+  for(int j=0;j<list.length()&&count<5;j++){
+   JSONObject x=list.optJSONObject(j);if(x==null)continue;
+   String rawDate=x.optString("date","");
+   String shownDate=rawDate.replace('-', '.');
+   int d=remaining(x);
+   v.setViewVisibility(row[count],android.view.View.VISIBLE);
+   v.setTextViewText(icon[count],x.optString("category","🎉"));
+   v.setTextViewText(name[count],x.optString("name","기념일"));
+   v.setTextViewText(date[count],shownDate);
+   v.setTextViewText(days[count],dday(d));
+   v.setTextColor(days[count],count%2==0?Color.rgb(239,82,123):Color.rgb(164,112,215));
+   count++;
+  }
+  for(int j=count;j<5;j++)v.setViewVisibility(row[j],android.view.View.GONE);
+  v.setViewVisibility(R.id.widget_empty,count==0?android.view.View.VISIBLE:android.view.View.GONE);
+ }
+ static void refresh(Context c){scheduleMidnight(c);try{JSONObject data=new JSONObject(c.getSharedPreferences(PREF,0).getString("data","{}"));AppWidgetManager manager=AppWidgetManager.getInstance(c);int[] ids=manager.getAppWidgetIds(new ComponentName(c,MoireWidget.class));JSONObject widgets=data.optJSONObject("widgets");for(int id:ids){JSONArray list=rows(widgets,String.valueOf(id));RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.moire_widget);renderWidget(v,list);Intent intent=new Intent(c,MainActivity.class).putExtra("moire_widget_id",id).setData(android.net.Uri.parse("moire://widget/"+id));PendingIntent pi=PendingIntent.getActivity(c,id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);v.setOnClickPendingIntent(R.id.widget_root,pi);manager.updateAppWidget(id,v);}NotificationManager nm=(NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
  nm.createNotificationChannel(new NotificationChannel(CHANNEL,"MOIRE 기념일 목록",NotificationManager.IMPORTANCE_LOW));
  JSONArray list=rows(data,"notifications");
  // Remove the old combined notification and stale child notifications without touching alarm notifications.

@@ -1,1 +1,45 @@
-<?xml version="1.0" encoding="utf-8"?><LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/widget_root" android:orientation="vertical" android:padding="16dp" android:background="#F5F5F3" android:layout_width="match_parent" android:layout_height="match_parent"><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="MOIRE" android:textStyle="bold" android:textColor="#222222" android:textSize="17sp"/><TextView android:id="@+id/widget_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="기념일을 선택하세요" android:textColor="#333333" android:textSize="14sp" android:maxLines="6"/></LinearLayout>
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/widget_root" android:orientation="vertical" android:padding="14dp" android:background="@drawable/moire_widget_card" android:layout_width="match_parent" android:layout_height="match_parent">
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="MOIRE" android:textStyle="bold" android:textColor="#222222" android:textSize="17sp" android:includeFontPadding="false"/>
+<TextView android:id="@+id/widget_empty" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="MOIRE에서 기념일을 선택하세요" android:textColor="#777777" android:textSize="13sp" android:visibility="gone"/>
+<LinearLayout android:id="@+id/widget_row_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="12dp" android:visibility="gone">
+<TextView android:id="@+id/widget_icon_1" android:layout_width="32dp" android:layout_height="wrap_content" android:text="🎉" android:textSize="22sp" android:gravity="center"/>
+<LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="8dp">
+<TextView android:id="@+id/widget_name_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="기념일" android:textStyle="bold" android:textSize="15sp" android:textColor="#252525" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+<TextView android:id="@+id/widget_date_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="2027.04.25" android:textSize="11sp" android:textColor="#888888" android:maxLines="1"/>
+</LinearLayout>
+<TextView android:id="@+id/widget_dday_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="D-153" android:textStyle="bold" android:textSize="17sp" android:textColor="#EF527B" android:maxLines="1"/>
+</LinearLayout>
+<LinearLayout android:id="@+id/widget_row_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="9dp" android:visibility="gone">
+<TextView android:id="@+id/widget_icon_2" android:layout_width="32dp" android:layout_height="wrap_content" android:text="🎉" android:textSize="22sp" android:gravity="center"/>
+<LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="8dp">
+<TextView android:id="@+id/widget_name_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="기념일" android:textStyle="bold" android:textSize="15sp" android:textColor="#252525" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+<TextView android:id="@+id/widget_date_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="2027.04.25" android:textSize="11sp" android:textColor="#888888" android:maxLines="1"/>
+</LinearLayout>
+<TextView android:id="@+id/widget_dday_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="D-153" android:textStyle="bold" android:textSize="17sp" android:textColor="#EF527B" android:maxLines="1"/>
+</LinearLayout>
+<LinearLayout android:id="@+id/widget_row_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="9dp" android:visibility="gone">
+<TextView android:id="@+id/widget_icon_3" android:layout_width="32dp" android:layout_height="wrap_content" android:text="🎉" android:textSize="22sp" android:gravity="center"/>
+<LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="8dp">
+<TextView android:id="@+id/widget_name_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="기념일" android:textStyle="bold" android:textSize="15sp" android:textColor="#252525" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+<TextView android:id="@+id/widget_date_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="2027.04.25" android:textSize="11sp" android:textColor="#888888" android:maxLines="1"/>
+</LinearLayout>
+<TextView android:id="@+id/widget_dday_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="D-153" android:textStyle="bold" android:textSize="17sp" android:textColor="#EF527B" android:maxLines="1"/>
+</LinearLayout>
+<LinearLayout android:id="@+id/widget_row_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="9dp" android:visibility="gone">
+<TextView android:id="@+id/widget_icon_4" android:layout_width="32dp" android:layout_height="wrap_content" android:text="🎉" android:textSize="22sp" android:gravity="center"/>
+<LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="8dp">
+<TextView android:id="@+id/widget_name_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="기념일" android:textStyle="bold" android:textSize="15sp" android:textColor="#252525" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+<TextView android:id="@+id/widget_date_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="2027.04.25" android:textSize="11sp" android:textColor="#888888" android:maxLines="1"/>
+</LinearLayout>
+<TextView android:id="@+id/widget_dday_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="D-153" android:textStyle="bold" android:textSize="17sp" android:textColor="#EF527B" android:maxLines="1"/>
+</LinearLayout>
+<LinearLayout android:id="@+id/widget_row_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="9dp" android:visibility="gone">
+<TextView android:id="@+id/widget_icon_5" android:layout_width="32dp" android:layout_height="wrap_content" android:text="🎉" android:textSize="22sp" android:gravity="center"/>
+<LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="8dp">
+<TextView android:id="@+id/widget_name_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="기념일" android:textStyle="bold" android:textSize="15sp" android:textColor="#252525" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+<TextView android:id="@+id/widget_date_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="2027.04.25" android:textSize="11sp" android:textColor="#888888" android:maxLines="1"/>
+</LinearLayout>
+<TextView android:id="@+id/widget_dday_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="D-153" android:textStyle="bold" android:textSize="17sp" android:textColor="#EF527B" android:maxLines="1"/>
+</LinearLayout>
+</LinearLayout>
