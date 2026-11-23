@@ -15,7 +15,29 @@ header{margin-bottom:46px}header h1{font-size:30px;letter-spacing:-1.4px}.brand{
 .settings-panel{margin-top:42px;border-top:1px solid #eee;padding-top:18px}.settings-panel summary{cursor:pointer;color:#888;font-size:13px}.settings-panel[open]{padding-bottom:30px}.settings-panel label{margin-top:20px}
 .widgetgrid{margin-top:12px}.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 dialog{background:#fff}dialog h2{letter-spacing:-.5px}
-</style></head><body><main class="app">
+</style>
+<style id="moire-card-design">
+/* MOIRE anniversary cards: soft rounded D-day Keep inspired layout */
+#list{display:flex;flex-direction:column;gap:11px;margin-top:15px}
+#list .item{border:1px solid #edf0f3;border-radius:22px;background:#fff;
+ padding:15px 12px;gap:12px;box-shadow:0 4px 16px rgba(26,38,60,.045);min-height:91px}
+#list .avatar{width:55px;height:55px;border-radius:17px;font-size:27px;
+ background:#f9e9ed;box-shadow:inset 0 0 0 1px #ffffff80}
+#list .grow{min-width:0}
+#list .name-text{font-size:15px;font-weight:750;color:#202939;line-height:1.35}
+#list .sub{font-size:11px;color:#89919e;margin-top:6px;line-height:1.4}
+#list .ordinal{font-size:10px;color:#a1a8b2;margin-top:3px}
+#list .item-controls{flex-direction:row;align-items:center;gap:4px;flex-shrink:0}
+#list .days{font-size:22px;font-weight:850;letter-spacing:-.8px;color:#f16b7b}
+#list .item:nth-child(4n+2) .days{color:#a681e8}
+#list .item:nth-child(4n+3) .days{color:#5aafe2}
+#list .item:nth-child(4n+4) .days{color:#49cba3}
+#list .edit{border:0;background:#f7f8fa;border-radius:8px;padding:7px 5px;
+ color:#9097a4;font-size:10px}
+#list .delete{color:#b0b5bf;font-size:18px;padding:3px 2px}
+@media(max-width:370px){#list .item{gap:8px;padding:12px 9px}#list .avatar{width:46px;height:46px;font-size:23px}#list .days{font-size:19px}#list .name-text{font-size:14px}}
+</style>
+</head><body><main class="app">
 <header><div><div class="brand">MOIRE · v2.4</div><h1>모아르</h1></div><button aria-label="설정 열기" class="header-menu" onclick="$('settingsPanel').open=!$('settingsPanel').open">⚙</button></header>
 <div class="between topbar"><span>디데이 관리</span><select aria-label="정렬" id="sort"><option value="upcoming">다가오는 순</option><option value="name">이름 순</option><option value="created">등록 순</option></select></div>
 <div class="category-filter"><label for="categoryFilter">분류별 보기</label><select id="categoryFilter" aria-label="기념일 분류 필터"><option value="all">전체</option></select></div><section class="emptycard" hidden="" id="emptyCard"><strong>기념일을 등록해보세요 🎉</strong><span>생일, 결혼기념일, 처음 만난 날 등<br/>소중한 날을 기록하세요.</span></section>
