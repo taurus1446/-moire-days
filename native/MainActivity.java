@@ -76,6 +76,18 @@ public class MainActivity extends BridgeActivity {
     }
     @JavascriptInterface public void openBackup(){runOnUiThread(()->openPicker.launch(new String[]{"application/json","text/plain","application/octet-stream"}));}
   }
+  public int getLaunchWidgetId(){
+    Intent i=getIntent();
+    return i==null?-1:i.getIntExtra("moire_widget_id",-1);
+  }
+  @Override protected void onNewIntent(Intent intent){
+    super.onNewIntent(intent);
+    setIntent(intent);
+    int id=getLaunchWidgetId();
+    if(id>=0 && getBridge()!=null && getBridge().getWebView()!=null)
+      runOnUiThread(()->getBridge().getWebView().evaluateJavascript(
+        "window.openWidgetSettings&&window.openWidgetSettings("+id+")",null));
+  }
   @Override public void onResume(){super.onResume();MoireWidget.refresh(this);MoireAlarm.scheduleAll(this);}
   public void chooseSound(){Intent i=new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);i.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE,RingtoneManager.TYPE_ALARM);i.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT,false);startActivityForResult(i,2402);}
   @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==2402&&result==RESULT_OK&&data!=null){Uri uri=data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);if(uri!=null)getSharedPreferences(MoireAlarm.PREF,0).edit().putString("sound_uri",uri.toString()).apply();}}
