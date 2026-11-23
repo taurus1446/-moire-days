@@ -5,6 +5,8 @@ PKG="$SRC/java/app/moire/anniversary"
 mkdir -p "$PKG" "$SRC/res/layout" "$SRC/res/xml"
 cp native/MainActivity.java native/MoireWidget.java native/MoireAlarm.java "$PKG/"
 cp native/moire_widget.xml "$SRC/res/layout/"
+mkdir -p "$SRC/res/drawable"
+cp native/moire_widget_card.xml "$SRC/res/drawable/"
 cp native/moire_widget_info.xml "$SRC/res/xml/"
 python3 - <<'PYXML'
 from pathlib import Path
