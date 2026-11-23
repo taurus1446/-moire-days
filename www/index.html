@@ -15,6 +15,25 @@ header{margin-bottom:46px}header h1{font-size:30px;letter-spacing:-1.4px}.brand{
 .settings-panel{margin-top:42px;border-top:1px solid #eee;padding-top:18px}.settings-panel summary{cursor:pointer;color:#888;font-size:13px}.settings-panel[open]{padding-bottom:30px}.settings-panel label{margin-top:20px}
 .widgetgrid{margin-top:12px}.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 dialog{background:#fff}dialog h2{letter-spacing:-.5px}
+
+/* MOIRE v2.4: compact bottom-right add button */
+.fab {
+  position: fixed;
+  left: auto;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  transform: none;
+  width: auto;
+  min-width: 94px;
+  max-width: none;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 24px;
+  font-size: 15px;
+  line-height: 1;
+  z-index: 20;
+  touch-action: manipulation;
+}
 </style>
 <style id="moire-card-design">
 /* MOIRE anniversary cards: soft rounded D-day Keep inspired layout */
@@ -71,7 +90,7 @@ dialog{background:#fff}dialog h2{letter-spacing:-.5px}
 <div class="between"><strong>나의 위젯</strong><span class="muted">앱 내부 카드</span></div><div class="widgetgrid" id="widgets"></div>
 <h2>홈 화면 위젯</h2><p class="hint">홈 화면에 추가한 MOIRE 위젯마다 표시할 기념일을 선택할 수 있습니다. 선택 즉시 갱신을 요청합니다.</p>
 <div class="status" id="nativeWidgets">Android 앱에서 위젯을 추가하면 이곳에 표시됩니다.</div>
-<h2>알림창</h2><p class="hint">선택한 기념일을 모두 개별 알림 카드로 표시합니다. 알림창에서 MOIRE 그룹을 펼쳐 확인할 수 있습니다.</p><div id="notificationChoices"></div>
+<h2>알림창</h2><p class="hint">선택한 기념일 중 가까운 3개를 표시합니다.</p><div id="notificationChoices"></div>
 <div class="tools"><button class="linkbtn" onclick="syncNative()" type="button">↻ 위젯 및 알림 새로고침</button></div>
 </div>
 <div id="manageBackup" class="manage-content" hidden>
@@ -81,7 +100,7 @@ dialog{background:#fff}dialog h2{letter-spacing:-.5px}
 </div></section><input accept=".json,application/json" hidden id="importFile" type="file"/>
 </section>
 <div class="visually-hidden" id="count"></div>
-<button class="fab" onclick="openForm()">＋ 새로 만들기</button></main><div class="toast" id="toast" role="status"></div>
+<button class="fab" type="button" aria-label="새 기념일 추가" onclick="openForm()">＋ 추가</button></main><div class="toast" id="toast" role="status"></div>
 <dialog id="dlg"><form id="form"><h2 id="formTitle" style="margin-top:0">새 기념일</h2><label for="name">기념일 이름</label><input id="name" maxlength="40" placeholder="예: 결혼기념일" required=""/><label for="calendarType">날짜 기준</label><select id="calendarType" onchange="toggleCalendar()"><option value="solar">양력</option><option value="lunar">음력</option></select><label for="date" id="dateLabel">기념일 시작 날짜 (양력)</label><input id="date" required="" type="date"/><div id="lunarInputs" style="display:none"><label for="lunarYear">음력 시작 연도</label><input id="lunarYear" max="2099" min="1900" type="number" value="2026"/><div style="display:flex;gap:8px"><div style="flex:1"><label for="lunarMonth">음력 월</label><select id="lunarMonth"></select></div><div style="flex:1"><label for="lunarDay">음력 일</label><select id="lunarDay"></select></div></div><label class="checkrow"><input id="lunarLeap" type="checkbox"/> 윤달에 태어난 날 / 윤달 기념일</label><p class="hint">윤달로 지정한 날짜는 같은 윤달이 있는 해에만 기념일이 발생합니다. 일반 음력 날짜는 윤달이 아닌 해당 월을 기준으로 합니다.</p><p class="hint" id="lunarPreview"></p></div><label for="category">분류</label><select id="category"><option value="🎂">🎂 생일</option><option value="❤️">❤️ 사랑</option><option value="👨‍👩‍👧">👨‍👩‍👧 가족</option><option value="🎓">🎓 학교·교육</option><option value="💼">💼 직장·사업</option><option value="🌿">🌿 생활·개인</option><option value="🐾">🐾 반려동물</option><option value="📅">📅 명절·공휴일</option><option value="🎉">🎉 특별한 날</option><option value="🕯️">🕯️ 추모·기일</option></select><label for="occasionType">세부 기념일 유형</label><select id="occasionType" onchange="toggleCustomOccasion()"></select><input aria-label="직접 입력할 기념일 유형" id="customOccasion" maxlength="40" placeholder="원하는 기념일 유형을 입력하세요" style="display:none"/><label class="checkrow"><input checked="" id="repeat" type="checkbox"/> 매년 반복하기</label><label for="photo">원형 사진 (갤러리에서 선택)</label><input accept="image/*" id="photo" type="file"/><div class="preview" id="photoPreview"></div><button class="linkbtn" id="removePhoto" onclick="clearPhoto()" type="button">사진 제거</button><fieldset><legend>기념일 알람 (기념일당 하나)</legend><label class="checkrow"><input id="alarmEnabled" type="checkbox"/> 알람 사용</label><label for="alarmOffset">알람 날짜</label><select id="alarmOffset"><option value="0">기념일 당일</option><option value="1">1일 전</option><option value="7">7일 전</option></select><label for="alarmTime">알람 시각</label><input id="alarmTime" type="time" value="08:00"/><label for="alarmSound">알람음</label><select id="alarmSound"><option value="default">휴대폰 기본 알람음</option><option value="silent">무음 (진동/알림)</option><option value="custom">선택한 휴대폰 알람음</option></select><button class="linkbtn" type="button" onclick="window.MoireNative?.pickAlarmSound?.()">휴대폰 알람음 선택</button><button class="linkbtn" type="button" onclick="window.MoireNative?.testAlarm?.()">알람 소리 테스트</button><p class="hint">선택한 날짜와 시각에 한 번 울립니다. Android의 정확한 알람 권한 및 알림 권한이 필요할 수 있습니다.</p></fieldset><fieldset><legend>캘린더 내보내기용 알림</legend><p class="hint">캘린더 파일에 포함할 사전 알림입니다. Android 자체 알람 설정과는 별개입니다.</p><div id="reminders"></div></fieldset><label class="checkrow"><input id="pinned" type="checkbox"/> 앱 내부 위젯 카드에 표시</label><div class="warn" id="error"></div><div class="actions"><button class="secondary" onclick="dlg.close()" type="button">취소</button><button class="primary" type="submit">저장</button></div></form></dialog>
 <dialog id="detail"><h2 class="center" id="detailTitle" style="margin-top:0"></h2><div id="detailAvatar"></div><div id="detailBody"></div><div class="rowbuttons"><button class="linkbtn" id="calendarBtn">캘린더 알림 내보내기</button><button class="linkbtn" id="detailEdit">수정</button><button class="linkbtn" onclick="detail.close()">닫기</button></div><p class="hint">캘린더 파일을 다운로드한 뒤 캘린더 앱으로 가져와야 알림이 적용됩니다. 캘린더 앱에 따라 가져오기와 알림 지원이 다릅니다.</p></dialog>
 <script>
@@ -241,7 +260,7 @@ let nativePrefs={notifications:[],widgets:{}};
 try{nativePrefs=Object.assign(nativePrefs,JSON.parse(localStorage.getItem(NKEY)||'{}'))}catch{}
 function selectedRows(ids){return entries.filter(e=>ids.includes(String(e.id))).map(e=>({id:String(e.id),name:e.name,date:formatDate(nextDate(e)),days:diff(nextDate(e)),category:e.category||'🎉'})).sort((a,b)=>a.days-b.days)}
 function syncNative(){
- try{localStorage.setItem(NKEY,JSON.stringify(nativePrefs));if(window.MoireNative){let data={notifications:selectedRows(nativePrefs.notifications),alarms:entries.filter(e=>e.alarm?.enabled).map(e=>({id:String(e.id),name:e.name,category:e.category||'🎉',date:formatDate(nextDate(e)),repeat:!!e.repeat,calendarType:e.calendarType||'solar',alarm:{enabled:true,offset:e.alarm.offset,time:e.alarm.time,sound:e.alarm.sound}})),widgets:{}};for(let [id,ids] of Object.entries(nativePrefs.widgets))data.widgets[id]=selectedRows(ids);window.MoireNative.update(JSON.stringify(data));}}catch(e){console.warn('Native sync',e)}
+ try{localStorage.setItem(NKEY,JSON.stringify(nativePrefs));if(window.MoireNative){let data={notifications:selectedRows(nativePrefs.notifications),alarms:entries.filter(e=>e.alarm?.enabled).map(e=>({id:String(e.id),name:e.name,category:e.category||'🎉',date:formatDate(nextDate(e)),repeat:!!e.repeat,offset:e.alarm.offset,time:e.alarm.time,sound:e.alarm.sound})),widgets:{}};for(let [id,ids] of Object.entries(nativePrefs.widgets))data.widgets[id]=selectedRows(ids);window.MoireNative.update(JSON.stringify(data));}}catch(e){console.warn('Native sync',e)}
  renderNativeChoices();
 }
 function renderNativeChoices(){
@@ -275,7 +294,7 @@ function openWidgetSettings(id){
 function checkWidgetLaunch(){
  try{
  const params=new URLSearchParams(location.search);
- const nativeId=window.MoireNative?.getLaunchWidgetId?.();const id=params.get('widgetId')||params.get('widget_id')||(nativeId>=0?String(nativeId):null);
+ const id=params.get('widgetId')||params.get('widget_id');
  if(id) {openWidgetSettings(id);return;}
  if(location.hash.startsWith('#widget='))openWidgetSettings(decodeURIComponent(location.hash.slice(8)));
  }catch(e){console.warn('Widget navigation',e)}
