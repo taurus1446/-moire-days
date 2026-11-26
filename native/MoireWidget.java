@@ -59,7 +59,9 @@ public class MoireWidget extends AppWidgetProvider {
  List<Integer> order=new ArrayList<>();
  for(int k=0;k<list.length();k++)if(list.optJSONObject(k)!=null)order.add(k);
  Collections.sort(order,(a,b)->{int da=remaining(list.optJSONObject(a)),db=remaining(list.optJSONObject(b));if((da<0)!=(db<0))return da<0?1:-1;return da<0?Integer.compare(db,da):Integer.compare(da,db);});
- for(int rank=0;rank<order.size();rank++){int k=order.get(rank);JSONObject x=list.optJSONObject(k);
+ // Post farthest first so newest-first notification panels also show nearest first.
+ long rankingTime=System.currentTimeMillis();
+ for(int rank=order.size()-1;rank>=0;rank--){int k=order.get(rank);JSONObject x=list.optJSONObject(k);
    String key=x.optString("id",String.valueOf(k));current.add(key);
    Intent launch=new Intent(c,MainActivity.class).setAction("app.moire.anniversary.OPEN_NOTIFICATION").setData(android.net.Uri.parse("moire://notification/"+android.net.Uri.encode(key)));
    PendingIntent pi=PendingIntent.getActivity(c,key.hashCode(),launch,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
@@ -69,7 +71,7 @@ public class MoireWidget extends AppWidgetProvider {
    Notification child=new Notification.Builder(c,CHANNEL).setSmallIcon(R.mipmap.ic_launcher)
     .setContentTitle(name).setContentText(detail)
     .setStyle(new Notification.BigTextStyle().bigText(detail))
-    .setGroup(GROUP).setSortKey(String.format(Locale.US,"%010d",rank)).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
+    .setWhen(rankingTime-rank*1000L).setGroup(GROUP).setSortKey(String.format(Locale.US,"%010d",rank)).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
     .setContentIntent(pi).setOngoing(true).setShowWhen(false).setOnlyAlertOnce(true).build();
    nm.notify("moire-day-"+key,2302,child);
  }
