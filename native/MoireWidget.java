@@ -56,7 +56,10 @@ public class MoireWidget extends AppWidgetProvider {
  android.content.SharedPreferences np=c.getSharedPreferences(NOTIF_PREF,0);
  Set<String> previous=np.getStringSet("ids",Collections.emptySet());
  Set<String> current=new HashSet<>();
- for(int k=0;k<list.length();k++){JSONObject x=list.optJSONObject(k);if(x==null)continue;
+ List<Integer> order=new ArrayList<>();
+ for(int k=0;k<list.length();k++)if(list.optJSONObject(k)!=null)order.add(k);
+ Collections.sort(order,(a,b)->{int da=remaining(list.optJSONObject(a)),db=remaining(list.optJSONObject(b));if((da<0)!=(db<0))return da<0?1:-1;return da<0?Integer.compare(db,da):Integer.compare(da,db);});
+ for(int rank=0;rank<order.size();rank++){int k=order.get(rank);JSONObject x=list.optJSONObject(k);
    String key=x.optString("id",String.valueOf(k));current.add(key);
    Intent launch=new Intent(c,MainActivity.class).setAction("app.moire.anniversary.OPEN_NOTIFICATION").setData(android.net.Uri.parse("moire://notification/"+android.net.Uri.encode(key)));
    PendingIntent pi=PendingIntent.getActivity(c,key.hashCode(),launch,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
@@ -66,18 +69,22 @@ public class MoireWidget extends AppWidgetProvider {
    Notification child=new Notification.Builder(c,CHANNEL).setSmallIcon(R.mipmap.ic_launcher)
     .setContentTitle(name).setContentText(detail)
     .setStyle(new Notification.BigTextStyle().bigText(detail))
-    .setGroup(GROUP).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
+    .setGroup(GROUP).setSortKey(String.format(Locale.US,"%010d",rank)).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
     .setContentIntent(pi).setOngoing(true).setShowWhen(false).setOnlyAlertOnce(true).build();
    nm.notify("moire-day-"+key,2302,child);
  }
  for(String old:previous)if(!current.contains(old))nm.cancel("moire-day-"+old,2302);
  np.edit().putStringSet("ids",new HashSet<>(current)).apply();
  if(current.isEmpty()){nm.cancel("moire-day-summary",2303);return;}
+ JSONObject first=list.optJSONObject(order.get(0));
+ String firstDetail=first.optString("category","🎉")+"  "+dday(remaining(first))+"  ·  "+first.optString("date","");
+ Notification.InboxStyle inbox=new Notification.InboxStyle().setBigContentTitle("MOIRE · 기념일").setSummaryText("선택한 기념일 "+current.size()+"개");
+ for(int k:order){JSONObject x=list.optJSONObject(k);inbox.addLine(x.optString("name","기념일")+"  "+dday(remaining(x)));}
  Intent open=new Intent(c,MainActivity.class);
  PendingIntent summaryPi=PendingIntent.getActivity(c,2303,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
  Notification summary=new Notification.Builder(c,CHANNEL).setSmallIcon(R.mipmap.ic_launcher)
-   .setContentTitle("MOIRE · 기념일").setContentText("선택한 기념일 "+current.size()+"개")
-   .setStyle(new Notification.InboxStyle().setBigContentTitle("MOIRE · 기념일").setSummaryText("선택한 기념일 "+current.size()+"개"))
+   .setContentTitle(first.optString("name","기념일")).setContentText(firstDetail)
+   .setStyle(inbox)
    .setGroup(GROUP).setGroupSummary(true).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
    .setContentIntent(summaryPi).setOngoing(true).setShowWhen(false).setOnlyAlertOnce(true).build();
  nm.notify("moire-day-summary",2303,summary);}catch(Exception e){android.util.Log.e("MOIRE","refresh",e);}}
